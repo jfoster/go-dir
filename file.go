@@ -1,6 +1,8 @@
 package file
 
 import (
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -30,4 +32,14 @@ func (f File) FullName() string {
 func (f File) FullPath() string {
 	fp := filepath.Join(f.Dir, f.FullName())
 	return filepath.Clean(fp)
+}
+
+// Read returns the file's data
+func (f File) Read() ([]byte, error) {
+	return ioutil.ReadFile(f.FullPath())
+}
+
+// Write writes data to the file
+func (f File) Write(data []byte, perm os.FileMode) error {
+	return ioutil.WriteFile(f.FullPath(), data, perm)
 }
