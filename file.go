@@ -1,4 +1,4 @@
-package file
+package dir
 
 import (
 	"io/ioutil"
@@ -9,37 +9,72 @@ import (
 
 // File ...
 type File struct {
-	Dir       string
-	Name      string
-	Extension string
+	Name    string
+	Ext     string
+	Content string
+	Parent  *Directory
 }
 
-// New creates a new File instance from a filepath string
-func New(file string) File {
-	dir := filepath.Dir(file)
-	ext := filepath.Ext(file)
-	name := filepath.Base(strings.TrimSuffix(file, ext))
-	return File{Dir: dir, Name: name, Extension: ext}
+// NewFile returns a pointer to a File with a specified name
+func NewFile(name string) *File {
+	ext := filepath.Ext(name)
+	return &File{
+		Name: strings.TrimSuffix(name, ext),
+		Ext:  ext,
+	}
 }
 
-// FullName returns a string of the filename + extension
+// NewFileContent returns a pointer to a File with a specified name and contents
+func NewFileContent(name, content string) (f *File) {
+	f = NewFile(name)
+	f.Content = content
+	return f
+}
+
+// String returns a formatted string of the file's name and extension
 func (f File) FullName() string {
-	fe := f.Name + f.Extension
-	return filepath.Clean(fe)
+	return f.Name + f.Ext
 }
 
-// FullPath returns a string of the filepath + filename + extension
-func (f File) FullPath() string {
-	fp := filepath.Join(f.Dir, f.FullName())
-	return filepath.Clean(fp)
+// Read populates the content of the file from the path
+func (f File) Read() error {
+	bytes, err := ioutil.ReadFile(f.Path())
+	if err != nil {
+		return err
+	}
+	f.Content = string(bytes)
+	return nil
 }
 
-// Read returns the file's data
-func (f File) Read() ([]byte, error) {
-	return ioutil.ReadFile(f.FullPath())
+// Write writes contents of the file to disk
+func (f File) Write() error {
+	return f.WritePerm(0644)
 }
 
-// Write writes data to the file
-func (f File) Write(data []byte, perm os.FileMode) error {
-	return ioutil.WriteFile(f.FullPath(), data, perm)
+// WritePerm writes contents of the file to disk with specified permissions
+func (f File) WritePerm(perm os.FileMode) error {
+	return ioutil.WriteFile(f.Path(), []byte(f.Content), perm)
+}
+
+// Parents impements Child and returns all the parents of a file
+func (f File) Parents() (s []*Directory) {
+	for parent := f.Parent; parent != nil; parent = parent.Parent {
+		s = append([]*Directory{parent}, s...)
+	}
+	return s
+}
+
+// Path impements Child and returns the full path to a file
+func (f File) Path() string {
+	var s = []string{}
+	for _, v := range f.Parents() {
+		s = append(s, v.Name)
+	}
+	s = append(s, f.FullName())
+	return filepath.Join(s...)
+}
+
+// String implements Stringer and return the full name of the file
+func (f File) String() string {
+	return f.FullName()
 }
