@@ -24,11 +24,25 @@ func NewFile(name string) *File {
 	}
 }
 
-// NewFileContent returns a pointer to a File with a specified name and contents
-func NewFileContent(name string, content []byte) (f *File) {
-	f = NewFile(name)
-	f.Content = content
+// NewFilePath returns a pointer to a File from a full filepath
+func NewFilePath(path string) (f *File) {
+	file := filepath.Base(path)
+	dir := filepath.Dir(path)
+	f = NewFile(file)
+	f.Parent = NewDirectory(dir)
 	return f
+}
+
+// WithContent returns a pointer to a File from an existing file with specified contents
+func (f File) WithContent(content []byte) *File {
+	f.Content = content
+	return &f
+}
+
+// WithParent returns a pointer to a File from an existing file with a specified parent
+func (f File) WithParent(parent *Directory) *File {
+	f.Parent = parent
+	return &f
 }
 
 // String returns a formatted string of the file's name and extension
