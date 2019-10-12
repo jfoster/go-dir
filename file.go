@@ -34,40 +34,40 @@ func NewFilePath(path string) (f *File) {
 }
 
 // WithContent returns a pointer to a File from an existing file with specified contents
-func (f File) WithContent(content []byte) *File {
+func (f *File) WithContent(content []byte) *File {
 	f.Content = content
-	return &f
+	return f
 }
 
 // WithParent returns a pointer to a File from an existing file with a specified parent
-func (f File) WithParent(parent *Directory) *File {
+func (f *File) WithParent(parent *Directory) *File {
 	f.Parent = parent
-	return &f
+	return f
 }
 
 // String returns a formatted string of the file's name and extension
-func (f File) FullName() string {
+func (f *File) FullName() string {
 	return f.Name + f.Ext
 }
 
 // Read populates the content of the file from the path
-func (f File) Read() (err error) {
+func (f *File) Read() (err error) {
 	f.Content, err = ioutil.ReadFile(f.Path())
 	return err
 }
 
 // Write writes contents of the file to disk
-func (f File) Write() error {
+func (f *File) Write() error {
 	return f.WritePerm(0644)
 }
 
 // WritePerm writes contents of the file to disk with specified permissions
-func (f File) WritePerm(perm os.FileMode) error {
+func (f *File) WritePerm(perm os.FileMode) error {
 	return ioutil.WriteFile(f.Path(), []byte(f.Content), perm)
 }
 
 // Parents impements Child and returns all the parents of a file
-func (f File) Parents() (s []*Directory) {
+func (f *File) Parents() (s []*Directory) {
 	for parent := f.Parent; parent != nil; parent = parent.Parent {
 		s = append([]*Directory{parent}, s...)
 	}
@@ -75,7 +75,7 @@ func (f File) Parents() (s []*Directory) {
 }
 
 // Path impements Child and returns the full path to a file
-func (f File) Path() string {
+func (f *File) Path() string {
 	var s = []string{}
 	for _, v := range f.Parents() {
 		s = append(s, v.Name)
@@ -85,6 +85,6 @@ func (f File) Path() string {
 }
 
 // String implements Stringer and return the full name of the file
-func (f File) String() string {
+func (f *File) String() string {
 	return f.FullName()
 }

@@ -26,6 +26,12 @@ func NewDirectory(name string) *Directory {
 	}
 }
 
+// WithParent returns a pointer to a Directory from an existing Directory with a specified parent
+func (d *Directory) WithParent(parent *Directory) *Directory {
+	d.Parent = parent
+	return d
+}
+
 // AddFile adds a file to a directory
 func (d *Directory) AddFile(f *File) {
 	d.Children = append(d.Children, f)
@@ -45,12 +51,12 @@ func (d *Directory) AddDirectoryName(s string) *Directory {
 }
 
 // Write writes a directory to disk
-func (d Directory) Write() error {
+func (d *Directory) Write() error {
 	return os.MkdirAll(d.Path(), 0755)
 }
 
 // WriteAll recurses a directory and all it's children and writes it to disk
-func (d Directory) WriteAll() error {
+func (d *Directory) WriteAll() error {
 	for _, v := range d.AllChildren() {
 		if d, ok := v.(*Directory); ok {
 			err := d.Write()
@@ -74,8 +80,8 @@ func (d *Directory) AllChildren() (c []Child) {
 }
 
 // Parents impements Child and returns all the parents of a directory
-func (d Directory) Parents() (s []*Directory) {
-	s = []*Directory{&d}
+func (d *Directory) Parents() (s []*Directory) {
+	s = []*Directory{d}
 	for parent := d.Parent; parent != nil; parent = parent.Parent {
 		s = append([]*Directory{parent}, s...)
 	}
@@ -83,7 +89,7 @@ func (d Directory) Parents() (s []*Directory) {
 }
 
 // Path impements Child and returns the full path to a directory
-func (d Directory) Path() string {
+func (d *Directory) Path() string {
 	var s = []string{}
 	for _, v := range d.Parents() {
 		s = append(s, v.Name)
@@ -92,7 +98,7 @@ func (d Directory) Path() string {
 }
 
 // String implements Stringer and returns the name of a directory
-func (d Directory) String() string {
+func (d *Directory) String() string {
 	return d.Name
 }
 
