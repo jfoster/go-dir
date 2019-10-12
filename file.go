@@ -11,7 +11,7 @@ import (
 type File struct {
 	Name    string
 	Ext     string
-	Content string
+	Content []byte
 	Parent  *Directory
 }
 
@@ -25,7 +25,7 @@ func NewFile(name string) *File {
 }
 
 // NewFileContent returns a pointer to a File with a specified name and contents
-func NewFileContent(name, content string) (f *File) {
+func NewFileContent(name string, content []byte) (f *File) {
 	f = NewFile(name)
 	f.Content = content
 	return f
@@ -37,13 +37,9 @@ func (f File) FullName() string {
 }
 
 // Read populates the content of the file from the path
-func (f File) Read() error {
-	bytes, err := ioutil.ReadFile(f.Path())
-	if err != nil {
-		return err
-	}
-	f.Content = string(bytes)
-	return nil
+func (f File) Read() (err error) {
+	f.Content, err = ioutil.ReadFile(f.Path())
+	return err
 }
 
 // Write writes contents of the file to disk
