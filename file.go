@@ -15,11 +15,17 @@ type File struct {
 	Parent  *Directory
 }
 
-// NewFile returns a pointer to a File with a specified name
-func NewFile(name string) *File {
-	ext := filepath.Ext(name)
+// NewFile returns a pointer to a File with a specified full name
+func NewFile(fullname string) *File {
+	ext := filepath.Ext(fullname)
+	name := strings.TrimSuffix(fullname, ext)
+	return NewFileExt(name, ext)
+}
+
+// NewFileExt returns a pointer to a File with a specified name + extension
+func NewFileExt(name string, ext string) *File {
 	return &File{
-		Name: strings.TrimSuffix(name, ext),
+		Name: name,
 		Ext:  ext,
 	}
 }
