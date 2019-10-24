@@ -1,6 +1,7 @@
 package dir
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -43,6 +44,11 @@ func NewFilePath(path string) (f *File) {
 func (f *File) WithContent(content []byte) *File {
 	f.Content = content
 	return f
+}
+
+// WithContentf returns a pointer to a File from an existing file with content from a format string and objects
+func (f *File) WithContentf(format string, a ...interface{}) *File {
+	return f.WithContent([]byte(fmt.Sprintf(format, a...)))
 }
 
 // WithParent returns a pointer to a File from an existing file with a specified parent
